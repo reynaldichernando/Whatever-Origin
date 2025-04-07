@@ -59,7 +59,7 @@ func init() {
 		panic(err)
 	}
 
-	commit, err := ioutil.ReadFile(".git/refs/heads/main")
+	commit, err := ioutil.ReadFile(".git/refs/heads/master")
 
 	if err != nil {
 		panic(err)
