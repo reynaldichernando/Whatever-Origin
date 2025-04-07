@@ -40,10 +40,6 @@ func init() {
 
 	key := os.Getenv("HONEY")
 
-	if key == "" {
-		panic("failed to find honeycomb write key")
-	}
-
 	bypassKey := os.Getenv("BYPASS")
 
 	if bypassKey != "" {
