@@ -10,7 +10,7 @@ Whatever Origin has been rewritten in Go.
 
 To run the server locally, you need to have Go installed, you can get it from [here](https://go.dev/doc/install).
 
-Close the repository, and run the following commands:
+Clone the repository, and run the following commands:
 
 ```bash
 go mod download
