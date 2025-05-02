@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+		<title>An open source alternative to AnyOrigin</title>
+		<meta charset="utf-8">
+		
+		<link rel="shortcut icon" type="image/png" href="/favicon.png">
+		<style type="text/css">
+		    .useit {
+		        background-color: #add8e6;
+		        border-color: #5f9ea0;
+		        border-style: solid;
+		        border-width: 2px;
+		        width: 1000px;
+		        padding: 2px;
+		    }
+			
+		    .useit h2 {
+		        margin: 0;
+		    }
+		</style>
+		
+		<script src="https://www.w3counter.com/tracker.js?id=140695"></script>
+    </head>
+    <body>
+        <h1>Whatever Origin</h1>
+        <h2>A humble open source clone of <a href="http://anyorigin.com/">AnyOrigin</a></h2>
+        <h3>With slightly better https support and uglier style</h3>
+
+        <p>When I was facing <a href="http://en.wikipedia.org/wiki/Same_origin_policy">Same Origin Policy</a> problems while developing <a href="http://bitcoinpie.com/">Bitcoin Pie</a>, I was excited to discover how <a href="http://anyorigin.com">anyorigin.com</a>
+            solved the issue for me ... only, a week later it stopped working for some https sites.</p>
+
+        <p>Having recently discovered <a href="http://heroku.com">Heroku</a> and <a href="http://www.playframework.org">Play! Framework</a>, I found that deploying a simple server app is no longer a big deal, and so made out to develop a simple, open source alternative to Any Origin.
+            Check out the project <a href="https://github.com/ripper234/Whatever-Origin">on github</a> (it contains a nice demo of Play!'s asynch IO).
+        </p>
+
+        <div class="useit">
+        <h2>Use It</h2>
+
+        <p>Usage is similar to anyorigin. For example, to fetch the data from http://google.com with jQuery, use this snippet:</p>
+
+        <div class="code">
+            <pre>
+$.getJSON('http://www.whateverorigin.org/get?url=' + encodeURIComponent('http://google.com') + '&callback=?', function(data){
+	alert(data.contents);
+});
+        	</pre>
+		</div>
+    </body>
+</html>
