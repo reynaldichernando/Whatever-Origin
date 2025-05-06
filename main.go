@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -54,14 +53,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	commit, err := ioutil.ReadFile(".git/refs/heads/master")
-
-	if err != nil {
-		panic(err)
-	}
-
-	getLogger.AddField("git", strings.TrimSpace(string(commit)))
 }
 
 func CORS(next http.Handler) http.Handler {
