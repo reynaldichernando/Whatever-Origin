@@ -26,18 +26,6 @@ type Response struct {
 var client *http.Client
 var limiter sync.Map
 
-var bypass = "Fly-Client-Ip"
-
-func init() {
-	client = &http.Client{}
-
-	bypassKey := os.Getenv("BYPASS")
-
-	if bypassKey != "" {
-		bypass = bypassKey
-	}
-}
-
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -105,9 +93,17 @@ func check(address string) bool {
 	return *count.(*int) < RATE_LIMIT
 }
 
+func getIP(request *http.Request) string {
+	clientIPHeader := os.Getenv("CLIENT_IP_HEADER")
+	if clientIPHeader != "" {
+		return request.Header.Get(clientIPHeader)
+	}
+
+	return request.RemoteAddr
+}
+
 func get(writer http.ResponseWriter, request *http.Request) {
 	URL := request.URL.Query().Get("url")
-	IP := request.Header.Get(bypass)
 
 	if URL == "" {
 		writer.Write([]byte("URL parameter is required."))
@@ -116,6 +112,7 @@ func get(writer http.ResponseWriter, request *http.Request) {
 
 	callback := request.URL.Query().Get("callback")
 
+	IP := getIP(request)
 	allowed := check(IP)
 
 	if !allowed {
