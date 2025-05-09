@@ -6,11 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
-
-const RATE_LIMIT = 600
 
 type Status struct {
 	URL  string `json:"url"`
@@ -25,6 +24,20 @@ type Response struct {
 
 var client *http.Client
 var limiter sync.Map
+var rateLimit int
+
+func init() {
+	client = &http.Client{}
+	limiter = sync.Map{}
+	rateLimit = 30
+	if os.Getenv("RATE_LIMIT") != "" {
+		var err error
+		rateLimit, err = strconv.Atoi(os.Getenv("RATE_LIMIT"))
+		if err != nil {
+			panic("Invalid RATE_LIMIT value")
+		}
+	}
+}
 
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -90,7 +103,7 @@ func check(address string) bool {
 
 	*count.(*int) += 1
 
-	return *count.(*int) < RATE_LIMIT
+	return *count.(*int) < rateLimit
 }
 
 func getIP(request *http.Request) string {
@@ -116,7 +129,7 @@ func get(writer http.ResponseWriter, request *http.Request) {
 	allowed := check(IP)
 
 	if !allowed {
-		writer.Write([]byte(fmt.Sprintf("rate limited: you have a max of %d request per second", RATE_LIMIT)))
+		writer.Write([]byte(fmt.Sprintf("rate limited: you have a max of %d request (s) per minute", rateLimit)))
 		return
 	}
 
