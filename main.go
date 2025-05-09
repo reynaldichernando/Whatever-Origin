@@ -8,8 +8,6 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"github.com/honeycombio/libhoney-go"
 )
 
 const RATE_LIMIT = 600
@@ -28,30 +26,15 @@ type Response struct {
 var client *http.Client
 var limiter sync.Map
 
-var getLogger *libhoney.Client
-
 var bypass = "Fly-Client-Ip"
 
 func init() {
-	var err error
-
 	client = &http.Client{}
-
-	key := os.Getenv("HONEY")
 
 	bypassKey := os.Getenv("BYPASS")
 
 	if bypassKey != "" {
 		bypass = bypassKey
-	}
-
-	getLogger, err = libhoney.NewClient(libhoney.ClientConfig{
-		APIKey:  key,
-		Dataset: "whatever-tunnel",
-	})
-
-	if err != nil {
-		panic(err)
 	}
 }
 
@@ -66,15 +49,10 @@ func CORS(next http.Handler) http.Handler {
 	})
 }
 
-func tunnel(URL string, event *libhoney.Event) Response {
-	event.AddField("origin", URL)
-
+func tunnel(URL string) Response {
 	request, err := http.NewRequest("GET", URL, nil)
 
 	if err != nil {
-		event.AddField("error", "invalid request")
-		event.AddField("error_raw", err)
-
 		return Response{
 			Status: Status{
 				URL:  URL,
@@ -86,9 +64,6 @@ func tunnel(URL string, event *libhoney.Event) Response {
 	response, err := client.Do(request)
 
 	if err != nil {
-		event.AddField("error", "request failed")
-		event.AddField("error_raw", err)
-
 		return Response{
 			Status: Status{
 				URL:  URL,
@@ -100,9 +75,6 @@ func tunnel(URL string, event *libhoney.Event) Response {
 	plain, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		event.AddField("error", "failed to read body")
-		event.AddField("error_raw", err)
-
 		return Response{
 			Status: Status{
 				URL:  URL,
@@ -120,11 +92,6 @@ func tunnel(URL string, event *libhoney.Event) Response {
 		},
 	}
 
-	event.AddField("content", result.Content)
-	event.AddField("status_url", result.Status.URL)
-	event.AddField("status_type", result.Status.Type)
-	event.AddField("status_code", result.Status.Code)
-
 	return result
 }
 
@@ -139,24 +106,10 @@ func check(address string) bool {
 }
 
 func get(writer http.ResponseWriter, request *http.Request) {
-	event := getLogger.NewEvent()
-	defer event.Send()
-
-	start := time.Now()
-
-	defer func(event *libhoney.Event) {
-		event.AddField("duration", time.Since(start).Milliseconds())
-	}(event)
-
 	URL := request.URL.Query().Get("url")
 	IP := request.Header.Get(bypass)
 
-	event.AddField("url", URL)
-	event.AddField("ip", IP)
-
 	if URL == "" {
-		event.AddField("error", "failed to find parameter")
-
 		writer.Write([]byte("URL parameter is required."))
 		return
 	}
@@ -165,18 +118,14 @@ func get(writer http.ResponseWriter, request *http.Request) {
 
 	allowed := check(IP)
 
-	if allowed == false {
-		event.AddField("error", "rate limited")
-
+	if !allowed {
 		writer.Write([]byte(fmt.Sprintf("rate limited: you have a max of %d request per second", RATE_LIMIT)))
 		return
 	}
 
-	body, _ := json.Marshal(tunnel(URL, event))
+	body, _ := json.Marshal(tunnel(URL))
 
 	if callback != "" {
-		event.AddField("callback", callback)
-
 		writer.Header().Set("Content-Type", "application/x-javascript")
 		body = []byte(callback + "(" + string(body) + ")")
 	} else {
