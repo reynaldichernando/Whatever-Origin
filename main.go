@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -129,15 +130,13 @@ func isLocalOrigin(origin string) bool {
 }
 
 func checkRateLimit(IP string, origin string) bool {
-	var value int
-
 	if originRateLimit > 0 && !isLocalOrigin(origin) {
-		count, _ := limiter.LoadOrStore(origin, &value)
+		count, _ := limiter.LoadOrStore(origin, new(int))
 		*count.(*int) += 1
 		return *count.(*int) < originRateLimit
 	}
 
-	count, _ := limiter.LoadOrStore(IP, &value)
+	count, _ := limiter.LoadOrStore(IP, new(int))
 	*count.(*int) += 1
 	return *count.(*int) < rateLimit
 }
@@ -146,6 +145,11 @@ func getIP(request *http.Request) string {
 	clientIPHeader := os.Getenv("CLIENT_IP_HEADER")
 	if clientIPHeader != "" {
 		return request.Header.Get(clientIPHeader)
+	}
+
+	ip, _, err := net.SplitHostPort(request.RemoteAddr)
+	if err == nil {
+		return ip
 	}
 
 	return request.RemoteAddr
