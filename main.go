@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -83,7 +83,7 @@ func tunnel(URL string) Response {
 		}
 	}
 
-	plain, err := ioutil.ReadAll(response.Body)
+	plain, err := io.ReadAll(response.Body)
 
 	if err != nil {
 		return Response{
