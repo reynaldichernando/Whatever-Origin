@@ -54,9 +54,7 @@ func init() {
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Access-Control-Allow-Origin", "*")
-		writer.Header().Set("Allow", "*")
-		writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
-		writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Referer, User-Agent")
+		writer.Header().Set("Access-Control-Allow-Methods", "GET")
 
 		next.ServeHTTP(writer, request)
 	})
