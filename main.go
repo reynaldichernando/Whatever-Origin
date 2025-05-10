@@ -6,11 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
-
-const RATE_LIMIT = 600
 
 type Status struct {
 	URL  string `json:"url"`
@@ -25,16 +24,18 @@ type Response struct {
 
 var client *http.Client
 var limiter sync.Map
-
-var bypass = "Fly-Client-Ip"
+var rateLimit int
 
 func init() {
 	client = &http.Client{}
-
-	bypassKey := os.Getenv("BYPASS")
-
-	if bypassKey != "" {
-		bypass = bypassKey
+	limiter = sync.Map{}
+	rateLimit = 30
+	if os.Getenv("RATE_LIMIT") != "" {
+		var err error
+		rateLimit, err = strconv.Atoi(os.Getenv("RATE_LIMIT"))
+		if err != nil {
+			panic("Invalid RATE_LIMIT value")
+		}
 	}
 }
 
@@ -102,12 +103,20 @@ func check(address string) bool {
 
 	*count.(*int) += 1
 
-	return *count.(*int) < RATE_LIMIT
+	return *count.(*int) < rateLimit
+}
+
+func getIP(request *http.Request) string {
+	clientIPHeader := os.Getenv("CLIENT_IP_HEADER")
+	if clientIPHeader != "" {
+		return request.Header.Get(clientIPHeader)
+	}
+
+	return request.RemoteAddr
 }
 
 func get(writer http.ResponseWriter, request *http.Request) {
 	URL := request.URL.Query().Get("url")
-	IP := request.Header.Get(bypass)
 
 	if URL == "" {
 		writer.Write([]byte("URL parameter is required."))
@@ -116,10 +125,11 @@ func get(writer http.ResponseWriter, request *http.Request) {
 
 	callback := request.URL.Query().Get("callback")
 
+	IP := getIP(request)
 	allowed := check(IP)
 
 	if !allowed {
-		writer.Write([]byte(fmt.Sprintf("rate limited: you have a max of %d request per second", RATE_LIMIT)))
+		writer.Write([]byte(fmt.Sprintf("rate limited: you have a max of %d request (s) per minute", rateLimit)))
 		return
 	}
 

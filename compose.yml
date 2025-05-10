@@ -1,6 +1,10 @@
 services:
   whatever-origin:
+    # build: .
     image: ghcr.io/reynaldichernando/whatever-origin:latest
     ports:
       - 80:8080
+    environment:
+      - RATE_LIMIT=60
+      # - CLIENT_IP_HEADER=X-Real-IP
     restart: always
