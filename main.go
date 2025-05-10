@@ -51,50 +51,30 @@ func init() {
 	}
 }
 
-func tunnel(URL string) Response {
+func tunnel(URL string) (Response, error) {
 	request, err := http.NewRequest("GET", URL, nil)
-
 	if err != nil {
-		return Response{
-			Status: Status{
-				URL:  URL,
-				Code: 500,
-			},
-		}
+		return Response{}, err
 	}
 
 	response, err := client.Do(request)
-
 	if err != nil {
-		return Response{
-			Status: Status{
-				URL:  URL,
-				Code: 500,
-			},
-		}
+		return Response{}, err
 	}
 
 	plain, err := io.ReadAll(response.Body)
-
 	if err != nil {
-		return Response{
-			Status: Status{
-				URL:  URL,
-				Code: 500,
-			},
-		}
+		return Response{}, err
 	}
 
-	result := Response{
+	return Response{
 		Content: string(plain),
 		Status: Status{
 			URL:  URL,
 			Type: response.Header.Get("Content-Type"),
 			Code: response.StatusCode,
 		},
-	}
-
-	return result
+	}, nil
 }
 
 func isLocalOrigin(origin string) bool {
@@ -163,11 +143,13 @@ func get(writer http.ResponseWriter, request *http.Request) {
 	origin := request.Header.Get("Origin")
 
 	if URL == "" {
+		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write([]byte("URL parameter is required."))
 		return
 	}
 
 	if origin == "" {
+		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write([]byte("Origin header is required."))
 		return
 	}
@@ -177,11 +159,18 @@ func get(writer http.ResponseWriter, request *http.Request) {
 		if originRateLimit > 0 && !isLocalOrigin(origin) {
 			rateLimitValue = originRateLimit
 		}
+		writer.WriteHeader(http.StatusTooManyRequests)
 		writer.Write([]byte(fmt.Sprintf("rate limited: limit %d request (s) per minute", rateLimitValue)))
 		return
 	}
 
-	body, _ := json.Marshal(tunnel(URL))
+	response, err := tunnel(URL)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte("Error while processing the request."))
+		return
+	}
+	body, _ := json.Marshal(response)
 
 	if callback != "" {
 		writer.Header().Set("Content-Type", "text/javascript")
