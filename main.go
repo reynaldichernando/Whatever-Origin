@@ -51,15 +51,6 @@ func init() {
 	}
 }
 
-func CORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Access-Control-Allow-Origin", "*")
-		writer.Header().Set("Access-Control-Allow-Methods", "GET")
-
-		next.ServeHTTP(writer, request)
-	})
-}
-
 func tunnel(URL string) Response {
 	request, err := http.NewRequest("GET", URL, nil)
 
@@ -154,6 +145,17 @@ func getIP(request *http.Request) string {
 }
 
 func get(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	if request.Method == "OPTIONS" {
+		writer.Header().Set("Access-Control-Allow-Methods", "GET")
+		writer.Header().Set("Access-Control-Allow-Headers", "*")
+		writer.WriteHeader(http.StatusNoContent)
+		return
+	} else if request.Method != "GET" {
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	URL := request.URL.Query().Get("url")
 	callback := request.URL.Query().Get("callback")
 
@@ -200,7 +202,7 @@ func main() {
 		}
 	}()
 
-	http.Handle("/get", CORS(http.HandlerFunc(get)))
+	http.Handle("/get", http.HandlerFunc(get))
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	panic(http.ListenAndServe(":8080", nil))
