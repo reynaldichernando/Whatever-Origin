@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -25,6 +27,7 @@ type Response struct {
 var client *http.Client
 var limiter sync.Map
 var rateLimit int
+var originRateLimit int
 
 func init() {
 	client = &http.Client{}
@@ -35,6 +38,14 @@ func init() {
 		rateLimit, err = strconv.Atoi(os.Getenv("RATE_LIMIT"))
 		if err != nil {
 			panic("Invalid RATE_LIMIT value")
+		}
+	}
+	originRateLimit = 0
+	if os.Getenv("ORIGIN_RATE_LIMIT") != "" {
+		var err error
+		originRateLimit, err = strconv.Atoi(os.Getenv("ORIGIN_RATE_LIMIT"))
+		if err != nil {
+			panic("Invalid ORIGIN_RATE_LIMIT value")
 		}
 	}
 }
@@ -96,13 +107,38 @@ func tunnel(URL string) Response {
 	return result
 }
 
-func check(address string) bool {
+func isLocalOrigin(origin string) bool {
+	if origin == "" {
+		return false
+	}
+	u, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+
+	hostname := u.Hostname()
+
+	localHostnames := []string{"localhost", "127.0.0.1", "0.0.0.0"}
+	for _, lh := range localHostnames {
+		if hostname == lh {
+			return true
+		}
+	}
+
+	return strings.HasPrefix(hostname, "192.168.")
+}
+
+func checkRateLimit(IP string, origin string) bool {
 	var value int
 
-	count, _ := limiter.LoadOrStore(address, &value)
+	if originRateLimit > 0 && !isLocalOrigin(origin) {
+		count, _ := limiter.LoadOrStore(origin, &value)
+		*count.(*int) += 1
+		return *count.(*int) < originRateLimit
+	}
 
+	count, _ := limiter.LoadOrStore(IP, &value)
 	*count.(*int) += 1
-
 	return *count.(*int) < rateLimit
 }
 
@@ -117,19 +153,27 @@ func getIP(request *http.Request) string {
 
 func get(writer http.ResponseWriter, request *http.Request) {
 	URL := request.URL.Query().Get("url")
+	callback := request.URL.Query().Get("callback")
+
+	IP := getIP(request)
+	origin := request.Header.Get("Origin")
 
 	if URL == "" {
 		writer.Write([]byte("URL parameter is required."))
 		return
 	}
 
-	callback := request.URL.Query().Get("callback")
+	if origin == "" {
+		writer.Write([]byte("Origin header is required."))
+		return
+	}
 
-	IP := getIP(request)
-	allowed := check(IP)
-
-	if !allowed {
-		writer.Write([]byte(fmt.Sprintf("rate limited: you have a max of %d request (s) per minute", rateLimit)))
+	if !checkRateLimit(IP, origin) {
+		rateLimitValue := rateLimit
+		if originRateLimit > 0 && !isLocalOrigin(origin) {
+			rateLimitValue = originRateLimit
+		}
+		writer.Write([]byte(fmt.Sprintf("rate limited: limit %d request (s) per minute", rateLimitValue)))
 		return
 	}
 
