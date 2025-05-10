@@ -182,7 +182,7 @@ func get(writer http.ResponseWriter, request *http.Request) {
 	body, _ := json.Marshal(tunnel(URL))
 
 	if callback != "" {
-		writer.Header().Set("Content-Type", "application/x-javascript")
+		writer.Header().Set("Content-Type", "text/javascript")
 		body = []byte(callback + "(" + string(body) + ")")
 	} else {
 		writer.Header().Set("Content-Type", "application/json")
