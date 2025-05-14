@@ -5,6 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Whatever Origin | The Original Open Source CORS Proxy</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta
+      name="description"
+      content="Whatever Origin is the original open source CORS proxy, helping developers bypass Same-Origin Policy restrictions since 2011. Free, open source, and easy to self-host."
+    />
+    <link rel="canonical" href="https://whateverorigin.org/" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://whateverorigin.org/" />
+    <meta
+      property="og:title"
+      content="Whatever Origin | The Original Open Source CORS Proxy"
+    />
+    <meta
+      property="og:description"
+      content="Whatever Origin is the original open source CORS proxy, helping developers bypass Same-Origin Policy restrictions since 2011."
+    />
+    <meta property="og:image" content="https://whateverorigin.org/logo.png" />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://whateverorigin.org/" />
+    <meta
+      property="twitter:title"
+      content="Whatever Origin | The Original Open Source CORS Proxy"
+    />
+    <meta
+      property="twitter:description"
+      content="Whatever Origin is the original open source CORS proxy, helping developers bypass Same-Origin Policy restrictions since 2011."
+    />
+    <meta
+      property="twitter:image"
+      content="https://whateverorigin.org/logo.png"
+    />
+    <!-- FAQ Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Whatever Origin?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Whatever Origin is a proxy to bypass the Same-Origin Policy restriction. Originally developed by Ron Gross."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does it work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It works by sending a request to the server, which then fetches the requested resource and returns it to the client. This way, the browser does not block the request due to same-origin policy."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use Whatever Origin in production?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "This public API has a strict bandwidth (100KBps) and rate (30 rpm) limit with no uptime guarantees. For production use you may prefer to self-host Whatever Origin or use a production-ready CORS proxy by Corsfix."
+            }
+          }
+        ]
+      }
+    </script>
     <style>
       /* Basic reset and fonts */
       * {
@@ -160,7 +225,7 @@
           <div class="feature-item">
             <span class="feature-icon" aria-hidden="true">🔓</span>
             <div>
-              <strong>Bypass Same Origin Policy</strong>
+              <strong>Bypass Same-Origin Policy</strong>
               <p>
                 Access resources from any domain, overcoming browser
                 restrictions.
@@ -195,15 +260,22 @@ fetch("https://whateverorigin.org/get?url=https://example.com&amp;callback=myfun
         <blockquote>
           <p>
             &ldquo;<em
-              >When I was facing Same Origin Policy problems while developing
-              Bitcoin Pie, I was excited to discover how anyorigin.com solved
-              the issue for me ... only, a week later it stopped working for
-              some https sites. Having recently discovered Heroku and Play!
+              >When I was facing Same-Origin Policy problems while developing
+              Bitcoin Pie, I was excited to discover how
+              <a
+                href="https://web.archive.org/web/20110525094707/http://anyorigin.com/"
+                target="_blank"
+                rel="noopener"
+                >anyorigin.com</a
+              >
+              solved the issue for me ... only, a week later it stopped working
+              for some https sites. Having recently discovered Heroku and Play!
               Framework, I found that deploying a simple server app is no longer
               a big deal, and so made out to develop a simple, open source
               alternative to Any Origin.</em
             >&rdquo;
           </p>
+          <br />
           <p>
             &mdash; Ron &ldquo;ripper234&rdquo; Gross, creator of
             Whatever&nbsp;Origin
@@ -217,7 +289,7 @@ fetch("https://whateverorigin.org/get?url=https://example.com&amp;callback=myfun
         <div class="faq-item">
           <strong>What is Whatever&nbsp;Origin?</strong>
           <p>
-            Whatever&nbsp;Origin is a proxy to bypass the Same Origin Policy
+            Whatever&nbsp;Origin is a proxy to bypass the Same-Origin Policy
             restriction. Originally developed by Ron Gross.
           </p>
         </div>
@@ -234,8 +306,9 @@ fetch("https://whateverorigin.org/get?url=https://example.com&amp;callback=myfun
         <div class="faq-item">
           <strong>Can I use Whatever&nbsp;Origin in production?</strong>
           <p>
-            This public API has a strict bandwidth (100KBps) and rate limit (30
-            rpm) with no uptime guarantees. For production use you may prefer to
+            This public API has a strict bandwidth (100KBps) and rate (30 rpm)
+            limit with no uptime guarantees. For production use you may prefer
+            to
             <a
               href="https://github.com/reynaldichernando/Whatever-Origin?tab=readme-ov-file#self-hosting"
               target="_blank"
@@ -254,20 +327,11 @@ fetch("https://whateverorigin.org/get?url=https://example.com&amp;callback=myfun
       <footer>
         <p>
           Whatever&nbsp;Origin was built by
-          <a href="https://www.ripper234.com" target="_blank" rel="noopener"
-            >Ron Gross</a
-          >
+          <a href="https://www.ripper234.com">Ron Gross</a>
           · Source code available on
-          <a
-            href="https://github.com/ripper234/whatever-origin"
-            target="_blank"
-            rel="noopener"
-            >GitHub</a
-          >
+          <a href="https://github.com/ripper234/whatever-origin">GitHub</a>
           · Hosted and maintained by
-          <a href="https://corsfix.com" target="_blank" rel="noopener"
-            >Corsfix</a
-          >
+          <a href="https://corsfix.com">Corsfix</a>
         </p>
       </footer>
     </div>
