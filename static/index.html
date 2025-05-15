@@ -64,7 +64,7 @@
             "name": "Can I use Whatever Origin in production?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "This public API has a strict bandwidth (100KBps) and rate (30 rpm) limit with no uptime guarantees. For production use you may prefer to self-host Whatever Origin or use a production-ready CORS proxy by Corsfix."
+              "text": "This public API has strict limits at 20 rpm per website, with speed and concurrency restrictions, and no uptime guarantees. For faster proxy, please self-host Whatever Origin or use production-ready CORS proxy by Corsfix."
             }
           }
         ]
@@ -248,10 +248,10 @@
         <h2>Usage</h2>
         <pre>
 # Simple GET
-fetch("https://whateverorigin.org/get?url=https://example.com")
+fetch(`https://whateverorigin.org/get?url=${encodeURIComponent('https://example.com')}`)
 
 # GET + JSONP
-fetch("https://whateverorigin.org/get?url=https://example.com&amp;callback=myfunction")</pre
+fetch(`https://whateverorigin.org/get?url=${encodeURIComponent('https://example.com')}&callback=myfunction`)</pre
         >
       </section>
 
@@ -306,16 +306,16 @@ fetch("https://whateverorigin.org/get?url=https://example.com&amp;callback=myfun
         <div class="faq-item">
           <strong>Can I use Whatever&nbsp;Origin in production?</strong>
           <p>
-            This public API has a strict bandwidth (100KBps) and rate (30 rpm)
-            limit with no uptime guarantees. For production use you may prefer
-            to
+            This public API has strict limits at 20 rpm per website, with speed
+            and concurrency restrictions, and no uptime guarantees. For faster
+            proxy, please
             <a
-              href="https://github.com/reynaldichernando/Whatever-Origin?tab=readme-ov-file#self-hosting"
+              href="https://github.com/ripper234/Whatever-Origin?tab=readme-ov-file#self-hosting"
               target="_blank"
               rel="noopener"
               >self-host Whatever&nbsp;Origin</a
             >
-            or use a
+            or use
             <a href="https://corsfix.com" target="_blank" rel="noopener"
               >production-ready CORS proxy</a
             >
