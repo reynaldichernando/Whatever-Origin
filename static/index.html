@@ -250,9 +250,20 @@
 # Simple GET
 fetch(`https://whateverorigin.org/get?url=${encodeURIComponent('https://example.com')}`)
 
-# GET + JSONP
-fetch(`https://whateverorigin.org/get?url=${encodeURIComponent('https://example.com')}&callback=myfunction`)</pre
-        >
+# GET + JSONP (using $.getJSON)
+$.getJSON(`https://whateverorigin.org/get?url=${encodeURIComponent('https://example.com')}&callback=?`, function(data) {
+  // data.contents contains the remote content
+  console.log(data.contents);
+});
+
+# GET + JSONP (using &lt;script&gt; tag)
+&lt;script src="https://whateverorigin.org/get?url=${encodeURIComponent('https://example.com')}&callback=myCallbackFunction"&gt;&lt;/script&gt;
+# And in your JavaScript:
+function myCallbackFunction(data) {
+  // data.contents contains the remote content
+  console.log(data.contents);
+}
+</pre>
       </section>
 
       <section id="quote">
