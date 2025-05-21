@@ -125,8 +125,8 @@ func getIP(request *http.Request) string {
 }
 
 func get(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	if request.Method == "OPTIONS" {
+		writer.Header().Set("Access-Control-Allow-Origin", "*")
 		writer.Header().Set("Access-Control-Allow-Methods", "GET")
 		writer.Header().Set("Access-Control-Allow-Headers", "*")
 		writer.WriteHeader(http.StatusNoContent)
@@ -141,6 +141,7 @@ func get(writer http.ResponseWriter, request *http.Request) {
 
 	IP := getIP(request)
 	origin := request.Header.Get("Origin")
+	referer := request.Header.Get("Referer")
 
 	if URL == "" {
 		writer.WriteHeader(http.StatusBadRequest)
@@ -148,9 +149,16 @@ func get(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if origin == "" {
+	if callback != "" {
+		if referer == "" {
+			writer.WriteHeader(http.StatusBadRequest)
+			writer.Write([]byte("Referer header is required for JSONP callback requests."))
+			return
+		}
+
+	} else if origin == "" {
 		writer.WriteHeader(http.StatusBadRequest)
-		writer.Write([]byte("Origin header is required."))
+		writer.Write([]byte("Origin header is required for cross origin requests."))
 		return
 	}
 
@@ -176,6 +184,7 @@ func get(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "text/javascript")
 		body = []byte(callback + "(" + string(body) + ")")
 	} else {
+		writer.Header().Set("Access-Control-Allow-Origin", "*")
 		writer.Header().Set("Content-Type", "application/json")
 	}
 
